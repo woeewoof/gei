@@ -1,81 +1,272 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corazón Animado</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gei ❤️</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        body {
-            overflow: hidden;
-            background: antiquewhite;
-        }
+body{
+    overflow:hidden;
+    background:#000;
+    font-family:Arial,sans-serif;
+}
 
-        canvas {
-            display: block;
-        }
-    </style>
+canvas{
+    position:fixed;
+    inset:0;
+}
+
+#container{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    pointer-events:none;
+}
+
+#heart{
+    width:320px;
+    height:320px;
+    animation:heartbeat 1.4s infinite;
+    filter:drop-shadow(0 0 10px #ff4da6)
+           drop-shadow(0 0 20px #ff4da6)
+           drop-shadow(0 0 40px #ff4da6);
+}
+
+#heart path{
+    fill:none;
+    stroke:#ff4da6;
+    stroke-width:8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+
+    stroke-dasharray:2000;
+    stroke-dashoffset:2000;
+
+    animation:
+        draw 4s ease forwards,
+        glow 2s infinite alternate;
+}
+
+#text{
+    position:absolute;
+    top:68%;
+    left:50%;
+    transform:translateX(-50%);
+    color:#ff4da6;
+    font-size:3rem;
+    font-weight:bold;
+
+    opacity:0;
+
+    text-shadow:
+        0 0 10px #ff4da6,
+        0 0 20px #ff4da6,
+        0 0 40px #ff4da6,
+        0 0 80px #ff4da6;
+
+    animation:
+        showText 1s forwards 3.8s,
+        textPulse 1.5s infinite 4s;
+}
+
+@keyframes draw{
+    to{
+        stroke-dashoffset:0;
+    }
+}
+
+@keyframes heartbeat{
+    0%,100%{
+        transform:scale(1);
+    }
+
+    25%{
+        transform:scale(1.05);
+    }
+
+    50%{
+        transform:scale(1.12);
+    }
+
+    75%{
+        transform:scale(1.05);
+    }
+}
+
+@keyframes glow{
+    from{
+        filter:brightness(1);
+    }
+
+    to{
+        filter:brightness(1.5);
+    }
+}
+
+@keyframes showText{
+    to{
+        opacity:1;
+    }
+}
+
+@keyframes textPulse{
+    0%,100%{
+        transform:translateX(-50%) scale(1);
+    }
+
+    50%{
+        transform:translateX(-50%) scale(1.15);
+    }
+}
+</style>
 </head>
+
 <body>
 
-<canvas id="canvas"></canvas>
+<canvas id="particles"></canvas>
+
+<div id="container">
+
+<svg id="heart" viewBox="-18 -18 36 36">
+<path d="
+M 0 12
+C -12 2 -16 -8 -8 -14
+C -2 -18 0 -12 0 -8
+C 0 -12 2 -18 8 -14
+C 16 -8 12 2 0 12
+"/>
+</svg>
+
+<div id="text">gei</div>
+
+</div>
 
 <script>
-const canvas = document.getElementById("canvas");
+
+const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 }
 resize();
-window.addEventListener("resize", resize);
+addEventListener("resize", resize);
 
-ctx.strokeStyle = "crimson";
-ctx.lineWidth = 1;
+const particles = [];
+const sparks = [];
 
-function xt(t) {
-    return 16 * Math.pow(Math.sin(t), 3);
-}
+class Particle{
+    constructor(){
+        this.reset();
+    }
 
-function yt(t) {
-    return 13 * Math.cos(t)
-         - 5 * Math.cos(2 * t)
-         - 2 * Math.cos(3 * t)
-         - Math.cos(4 * t);
-}
+    reset(){
+        this.x = innerWidth/2 + (Math.random()-0.5)*250;
+        this.y = innerHeight/2 + (Math.random()-0.5)*250;
 
-const scaleFactor = 7.5;
-let i = 0;
-const maxPoints = 2550;
+        this.vx = (Math.random()-0.5)*0.7;
+        this.vy = (Math.random()-0.5)*0.7;
 
-function draw() {
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+        this.size = Math.random()*3+1;
+        this.life = Math.random()*150+80;
+    }
 
-    for (let n = 0; n < 8 && i < maxPoints; n++, i++) {
+    update(){
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
 
-        const x = centerX + xt(i) * scaleFactor;
-        const y = centerY - yt(i) * scaleFactor;
+        if(this.life <= 0){
+            this.reset();
+        }
+    }
 
+    draw(){
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-    }
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
 
-    if (i < maxPoints) {
-        requestAnimationFrame(draw);
+        ctx.fillStyle="rgba(255,77,166,0.8)";
+        ctx.shadowBlur=20;
+        ctx.shadowColor="#ff4da6";
+        ctx.fill();
     }
 }
 
-draw();
+for(let i=0;i<120;i++){
+    particles.push(new Particle());
+}
+
+class Spark{
+    constructor(x,y){
+        this.x=x;
+        this.y=y;
+
+        this.vx=(Math.random()-0.5)*4;
+        this.vy=(Math.random()-0.5)*4;
+
+        this.life=40;
+        this.size=Math.random()*3+1;
+    }
+
+    update(){
+        this.x+=this.vx;
+        this.y+=this.vy;
+        this.life--;
+    }
+
+    draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+
+        ctx.fillStyle=`rgba(255,77,166,${this.life/40})`;
+        ctx.shadowBlur=20;
+        ctx.shadowColor="#ff4da6";
+        ctx.fill();
+    }
+}
+
+window.addEventListener("mousemove",(e)=>{
+
+    for(let i=0;i<4;i++){
+        sparks.push(new Spark(e.clientX,e.clientY));
+    }
+
+});
+
+function animate(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+        p.update();
+        p.draw();
+    });
+
+    for(let i=sparks.length-1;i>=0;i--){
+
+        sparks[i].update();
+        sparks[i].draw();
+
+        if(sparks[i].life<=0){
+            sparks.splice(i,1);
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
 </script>
 
 </body>
