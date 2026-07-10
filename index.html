@@ -15,7 +15,7 @@
 body{
     overflow:hidden;
     background:#000;
-    font-family:Arial,sans-serif;
+    font-family:Arial, sans-serif;
 }
 
 canvas{
@@ -33,26 +33,29 @@ canvas{
 }
 
 #heart{
-    width:320px;
-    height:320px;
-    animation:heartbeat 1.4s infinite;
-    filter:drop-shadow(0 0 10px #ff4da6)
-           drop-shadow(0 0 20px #ff4da6)
-           drop-shadow(0 0 40px #ff4da6);
+    width:260px;
+    height:260px;
+    animation:heartbeat 1.3s infinite;
 }
 
 #heart path{
     fill:none;
-    stroke:#ff4da6;
-    stroke-width:8;
+    stroke:crimson;
+    stroke-width:3;
+
     stroke-linecap:round;
     stroke-linejoin:round;
 
-    stroke-dasharray:2000;
-    stroke-dashoffset:2000;
+    stroke-dasharray:1200;
+    stroke-dashoffset:1200;
+
+    filter:
+        drop-shadow(0 0 4px crimson)
+        drop-shadow(0 0 8px crimson)
+        drop-shadow(0 0 16px crimson);
 
     animation:
-        draw 4s ease forwards,
+        draw 3s ease forwards,
         glow 2s infinite alternate;
 }
 
@@ -61,21 +64,22 @@ canvas{
     top:68%;
     left:50%;
     transform:translateX(-50%);
-    color:#ff4da6;
+
+    color:crimson;
     font-size:3rem;
     font-weight:bold;
 
     opacity:0;
 
     text-shadow:
-        0 0 10px #ff4da6,
-        0 0 20px #ff4da6,
-        0 0 40px #ff4da6,
-        0 0 80px #ff4da6;
+        0 0 5px crimson,
+        0 0 10px crimson,
+        0 0 20px crimson,
+        0 0 40px crimson;
 
     animation:
-        showText 1s forwards 3.8s,
-        textPulse 1.5s infinite 4s;
+        showText 1s forwards 2.8s,
+        textPulse 1.4s infinite 4s;
 }
 
 @keyframes draw{
@@ -89,26 +93,24 @@ canvas{
         transform:scale(1);
     }
 
-    25%{
-        transform:scale(1.05);
-    }
-
     50%{
-        transform:scale(1.12);
-    }
-
-    75%{
-        transform:scale(1.05);
+        transform:scale(1.08);
     }
 }
 
 @keyframes glow{
     from{
-        filter:brightness(1);
+        filter:
+            drop-shadow(0 0 4px crimson)
+            drop-shadow(0 0 8px crimson)
+            drop-shadow(0 0 16px crimson);
     }
 
     to{
-        filter:brightness(1.5);
+        filter:
+            drop-shadow(0 0 8px crimson)
+            drop-shadow(0 0 16px crimson)
+            drop-shadow(0 0 32px crimson);
     }
 }
 
@@ -124,7 +126,7 @@ canvas{
     }
 
     50%{
-        transform:translateX(-50%) scale(1.15);
+        transform:translateX(-50%) scale(1.1);
     }
 }
 </style>
@@ -132,18 +134,18 @@ canvas{
 
 <body>
 
-<canvas id="particles"></canvas>
+<canvas id="bg"></canvas>
 
 <div id="container">
 
-<svg id="heart" viewBox="-18 -18 36 36">
-<path d="
-M 0 12
-C -12 2 -16 -8 -8 -14
-C -2 -18 0 -12 0 -8
-C 0 -12 2 -18 8 -14
-C 16 -8 12 2 0 12
-"/>
+<svg id="heart" viewBox="0 0 400 400">
+    <path d="
+    M 200 320
+    C 180 290 70 220 70 140
+    C 70 70 140 40 200 100
+    C 260 40 330 70 330 140
+    C 330 220 220 290 200 320
+    "/>
 </svg>
 
 <div id="text">gei</div>
@@ -152,117 +154,81 @@ C 16 -8 12 2 0 12
 
 <script>
 
-const canvas = document.getElementById("particles");
+const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
 function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 resize();
-addEventListener("resize", resize);
+window.addEventListener("resize", resize);
 
-const particles = [];
-const sparks = [];
+const words = [];
 
-class Particle{
+class FallingWord{
+
     constructor(){
         this.reset();
     }
 
     reset(){
-        this.x = innerWidth/2 + (Math.random()-0.5)*250;
-        this.y = innerHeight/2 + (Math.random()-0.5)*250;
-
-        this.vx = (Math.random()-0.5)*0.7;
-        this.vy = (Math.random()-0.5)*0.7;
-
-        this.size = Math.random()*3+1;
-        this.life = Math.random()*150+80;
+        this.x = Math.random() * canvas.width;
+        this.y = -Math.random() * canvas.height;
+        this.speed = 1 + Math.random() * 4;
+        this.size = 14 + Math.random() * 28;
+        this.opacity = 0.15 + Math.random() * 0.85;
     }
 
     update(){
-        this.x += this.vx;
-        this.y += this.vy;
-        this.life--;
 
-        if(this.life <= 0){
-            this.reset();
+        this.y += this.speed;
+
+        if(this.y > canvas.height + 50){
+            this.y = -50;
+            this.x = Math.random() * canvas.width;
         }
     }
 
     draw(){
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
 
-        ctx.fillStyle="rgba(255,77,166,0.8)";
-        ctx.shadowBlur=20;
-        ctx.shadowColor="#ff4da6";
-        ctx.fill();
+        ctx.font = `${this.size}px Arial`;
+
+        ctx.fillStyle =
+        `rgba(220,20,60,${this.opacity})`;
+
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "crimson";
+
+        ctx.fillText(
+            "gei",
+            this.x,
+            this.y
+        );
     }
 }
 
-for(let i=0;i<120;i++){
-    particles.push(new Particle());
+for(let i = 0; i < 120; i++){
+    words.push(new FallingWord());
 }
-
-class Spark{
-    constructor(x,y){
-        this.x=x;
-        this.y=y;
-
-        this.vx=(Math.random()-0.5)*4;
-        this.vy=(Math.random()-0.5)*4;
-
-        this.life=40;
-        this.size=Math.random()*3+1;
-    }
-
-    update(){
-        this.x+=this.vx;
-        this.y+=this.vy;
-        this.life--;
-    }
-
-    draw(){
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-
-        ctx.fillStyle=`rgba(255,77,166,${this.life/40})`;
-        ctx.shadowBlur=20;
-        ctx.shadowColor="#ff4da6";
-        ctx.fill();
-    }
-}
-
-window.addEventListener("mousemove",(e)=>{
-
-    for(let i=0;i<4;i++){
-        sparks.push(new Spark(e.clientX,e.clientY));
-    }
-
-});
 
 function animate(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
-    particles.forEach(p=>{
-        p.update();
-        p.draw();
+    words.forEach(word=>{
+        word.update();
+        word.draw();
     });
 
-    for(let i=sparks.length-1;i>=0;i--){
-
-        sparks[i].update();
-        sparks[i].draw();
-
-        if(sparks[i].life<=0){
-            sparks.splice(i,1);
-        }
-    }
-
-    requestAnimationFrame(animate);
+    requestAnimationFrame(
+        animate
+    );
 }
 
 animate();
